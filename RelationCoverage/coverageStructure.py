@@ -23,7 +23,6 @@ class Coverage:
     def __init__(self):
         self.HWLibraries = []
         self.SWLibraries = []
-        #self.MODLibraries = []
 
 class ConditionNode:
     def __init__(self, condition):
@@ -35,8 +34,6 @@ COVERAGE_STRUCTURE = Coverage()
 PC_LINE = ""
 
 def findMethod(tokenized):
-    # if tokenized[-1] == "MEMS_GYRO::MEMS_GYRO()":
-    #     print("stop")
     openingPos = -1
     foundLamda = False
     for i, token in enumerate(reversed(tokenized)):
@@ -64,8 +61,6 @@ def findMethod(tokenized):
     return ""
 
 def recursiveParse(source):
-    # if(source.find("std::function<op_reg_t(op_reg_t, op_reg_t)> vAdd()") != -1):
-    #     print("stop")
     i = 0
     k = 0
     content = []
@@ -79,8 +74,6 @@ def recursiveParse(source):
                 if(token.find(")") != -1):
                     pos = len(tokenized) - j
                     methodName = findMethod(tokenized[:pos])
-                    # if methodName == "std::function<op_reg_t":
-                    #     print("stop")
                     content.append(Content("Method", methodName, [], []))
                     break
                 if token.endswith("class") or token.endswith("namespace") or token.endswith("struct"):
@@ -147,8 +140,6 @@ def disassembleConditions(code, rootNode, firstLine, firstColumn):
     currentNode = rootNode
     subNode = ConditionNode("<INVALID>")
     while(current+1<len(code)):
-        # if(code == "int_enabled"):
-        #     print("stop")
         if(code[current:].strip().startswith("unlikely(")):
             return current
         if(code[current] == "(" and checkIfCondition(code[start:current])):
@@ -396,8 +387,6 @@ def findBranch(code, token, firstLine, branches):
                     else:
                         column = code.find("while") 
                 disassembleConditions(conditions, root, firstLine + code[:start+substart].count("\n"), column)
-                # if conditions == "x":
-                #     print("stop")
                 trueStatement = findNextStatement(subcode[substart:])
                 trueLine = currentLine + subcode[substart:substart+trueStatement].count("\n")
                 trueColumn = trueStatement - subcode[substart:substart+trueStatement].rfind("\n")
@@ -422,8 +411,6 @@ def findBranches(code, firstLine, branches):
 def generateCoverageFileInformationRecursive(content, code, lines):
     end = 0
     if content.Type == "Method":
-        #if content.Name == "transport":
-        #     print("stop")
         content.LineNumber = lines + code[:code.replace("\t", " ").find(" " + content.Name + "(")].count("\n") + 1   
         interfaceStart = code.replace("\t", " ").find(" " + content.Name + "(")
         if interfaceStart == -1:
@@ -450,8 +437,6 @@ def parseCodeContentHierarchy():
             appendFile(COVERAGE_STRUCTURE.HWLibraries, file)
         elif file[0] == "SW":
             appendFile(COVERAGE_STRUCTURE.SWLibraries, file)
-        #elif file[0] == "MOD":
-        #    appendFiles(COVERAGE_STRUCTURE.MODLibraries, file)
         else:
             print("<X> error when parsing the code content hierarchy")
 
@@ -486,14 +471,6 @@ def parseCodeContent():
                 for content in file.Content:
                     tmp_pos, lines = generateCoverageFileInformationRecursive(content, code[last_pos:], lines)
                     last_pos = last_pos + tmp_pos
-    # for mod in cover.MODLibraries:
-    #     for file in sw.Files:
-    #         #print("File: " + file.Name)
-    #         with open(file.Name, "r") as source:
-                
-    #             code = source.read().replace("\t", " ")
-    #             for content in file.Content:
-    #                 generateCoverageFileInformationRecursive(content, code)
 
 def parseCoverageStructure():
     parseCodeContentHierarchy()

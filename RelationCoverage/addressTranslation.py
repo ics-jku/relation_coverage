@@ -18,7 +18,6 @@ RECORDING_ADDRESS = 0
 
 HW_BRANCHES = [[-1,-1] for i in range(0x7FFFFF)]
 SW_BRANCHES = [[-1,-1] for i in range(0x7FFFFF)]
-#MOD_BRANCHES = [[-1,-1] for i in range(0x7FFFFF)]
 
 def exportHWBranchRecursive(address_file, fileName, branch):
     global HW_BRANCHES
@@ -38,8 +37,6 @@ def exportHWBranchRecursive(address_file, fileName, branch):
         address = 0
         true_addr = 0
         false_addr = 0
-        # if fileName.endswith("mems_gyro.h"):
-        #     print("stop")
         for hw_info in HW_DWARF_INFO:
             if hw_info[0] == fileName and hw_info[1] == int(loc[0]) and hw_info[2] == int(loc[1]):
                 address = hw_info[3]
@@ -93,8 +90,6 @@ def exportSWBranchRecursive(address_file, fileName, branch):
         address = 0
         true_addr = 0
         false_addr = 0
-        # if fileName == "/home/hazott/hazott@local.ics.jku.at/Research/Coverage/riscv_vp/sw/mems_gyro/mems_gyro.c" and loc[0] == "43":
-        #     print("stop")
         for sw_info in SW_DWARF_INFO:
             if sw_info[0] == fileName and sw_info[1] == int(loc[0]) and sw_info[2] == int(loc[1]):
                 address = sw_info[3]
@@ -129,71 +124,7 @@ def exportSWBranchRecursive(address_file, fileName, branch):
         else:
             SW_BRANCHES[address] = [0,0]
             address_file.write("3:" + str(address) + ":" + str(true_addr) + ":" + str(false_addr) + "\n")
-       
-        # if address == 0:
-        #     for sw_info in SW_DWARF_INFO:
-        #         if sw_info[0] == fileName and sw_info[1] == int(loc[0]) and sw_info[2] == int(loc[1]):
-        #             address = sw_info[3]
-        # false_loc = int(loc_false[0])
-        # if false_addr == 0:
-        #     numLines = sum(1 for _ in open(fileName))
 
-        #     while(false_addr == 0 and false_loc < numLines):
-        #         false_loc += + 1
-        #         for sw_info in SW_DWARF_INFO:
-        #             if sw_info[0] == fileName and sw_info[1] == false_loc:
-        #                 false_addr = sw_info[3]
-        #                 break
-        # if address == 0 or true_addr == 0 or false_addr == 0:
-            
-        #     print("SW: Possible Dead Code or unsupported statement detected for " + fileName + ":" + branch.condition)
-        # else:
-        #     address_file.write("3:" + str(address) + ":" + str(true_addr) + ":" + str(false_addr) + "\n")
-        #     SW_BRANCHES[address] = [0,0]
-
-# def exportMODBranchRecursive(address_file, fileName, branch):
-#     true = "??"
-#     false = "??"
-#     if branch.condTrue != None:
-#         true = branch.condTrue.condition
-#         exportMODBranchRecursive(address_file, fileName, branch.condTrue)
-#     if branch.condFalse != None:
-#         false = branch.condFalse.condition
-#         exportMODBranchRecursive(address_file, fileName, branch.condFalse)
-#     if branch.condTrue != None and branch.condFalse != None:
-#         loc = branch.condition.split(":")
-#         loc_true = true.split(":")
-#         loc_false = false.split(":")
-#         address = 0
-#         true_addr = 0
-#         false_addr = 0
-
-#         for mod_info in MOD_DWARF_INFO:
-#             if mod_info[0] == fileName and mod_info[1] == int(loc[0]) and mod_info[2] == int(loc[1])-1:
-#                 address = mod_info[3]
-#             if mod_info[0] == fileName and mod_info[1] == int(loc_true[0]):
-#                 true_addr = mod_info[3]
-#             if mod_info[0] == fileName and mod_info[1] == int(loc_false[0]):
-#                 false_addr = mod_info[3]
-#         if address == 0:
-#             for mod_info in MOD_DWARF_INFO:
-#                 if mod_info[0] == fileName and mod_info[1] == int(loc[0]) and mod_info[2] == int(loc[1]):
-#                     address = mod_info[3]
-#         false_loc = int(loc_false[0])
-#         if false_addr == 0:
-#             numLines = sum(1 for _ in open(fileName))
-
-#             while(false_addr == 0 and false_loc < numLines):
-#                 false_loc += + 1
-#                 for mod_info in MOD_DWARF_INFO:
-#                     if mod_info[0] == fileName and mod_info[1] == false_loc:
-#                         false_addr = mod_info[3]
-#                         break
-#         if address == 0 or true_addr == 0 or false_addr == 0:
-#             print("MOD: Possible Dead Code or unsupported statement detected for " + fileName + ":" + branch.condition)
-#         else:
-#             address_file.write("6:" + str(address) + ":" + str(true_addr) + ":" + str(false_addr) + "\n")
-#             mod_branches[address] = [0,0]
 
 def updateRelations(position,address):
     for relation in relationCoverage.RELATIONS:
@@ -208,10 +139,8 @@ def updateRelations(position,address):
                    relation.Rhs[i] = relation.Rhs[i] + ":" + address + ":0"
 
 def fillPCMap(dwarfinfo, type):
-#    global MODULE
     global SW_DWARF_INFO
     global HW_DWARF_INFO
-#    global MOD_DWARF_INFO
     global PC_LINE_ADDRESS
     global RECORDING_ADDRESS
 
@@ -220,8 +149,6 @@ def fillPCMap(dwarfinfo, type):
         binary_path = configuration.CFG_SOFTWARE
     elif type == "HW":
         binary_path = configuration.CFG_HARDWARE
-    # elif type == "MOD":
-    #     binary_path = MODULE
 
     for CU in dwarfinfo.iter_CUs():
         lineprog = dwarfinfo.line_program_for_CU(CU)
@@ -266,8 +193,6 @@ def fillPCMap(dwarfinfo, type):
                     else:
                         HW_DWARF_INFO.append([str(Path(path + "/" + filename).absolute().resolve()), line, column-1, address])
                         updateRelations(str(Path(path + "/" + filename).absolute().resolve()) + ":" + str(line), str(address))
-                # elif type== "MOD":
-                #     MOD_DWARF_INFO.append([str(Path(path + "/" + filename).absolute().resolve()), line, column-1, address])
             if entry.state.end_sequence:
                 prevstate = None
             else:
@@ -295,17 +220,6 @@ def exportSWStatement(address_file, fileName, content):
                 exportSWBranchRecursive(address_file, fileName, branch)
         exportSWStatement(address_file, fileName, inner.Content)
 
-# def exportMODStatement(address_file, fileName, content):
-#     for inner in content:
-#         if inner.Type == "Line":
-#             for mod_info in MOD_DWARF_INFO:
-#                 if mod_info[0] == fileName and mod_info[1] == int(inner.Name):
-#                     address_file.write("5:" + str(mod_info[3]) + "\n")
-#         elif inner.Type == "Method":
-#             for branch in inner.Branches:
-#                 exportMODBranchRecursive(address_file, fileName, branch)
-#         exportMODStatement(address_file, fileName, inner.Content)
-
 def readDWARFInfo(type):
 
     path = ""
@@ -313,8 +227,6 @@ def readDWARFInfo(type):
         path = configuration.CFG_SOFTWARE
     elif type == "HW":
         path = configuration.CFG_HARDWARE
-    # elif type == "MOD":
-    #     path = MODULE
     with open(path, "rb") as binary:
         elffile = ELFFile(binary)
         dwarfinfo = None
@@ -340,13 +252,9 @@ def exportAddressTable():
         for sw in coverageStructure.COVERAGE_STRUCTURE.SWLibraries:
             for file in sw.Files:
                 exportSWStatement(address_file, file.Name, file.Content)
-        # for mod in cover.MODLibraries:
-        #     for file in mod.Files:
-        #         exportMODStatement(address_file, file.Name, file.Content)
 
 
 def generateAddressTable():
     readDWARFInfo("HW")
     readDWARFInfo("SW")
-    #readDWARFInfo("MOD")
     exportAddressTable()

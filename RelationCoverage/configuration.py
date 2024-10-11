@@ -12,9 +12,6 @@ CFG_SOFTWARE_BUILD_SYSTEM = ""
 CFG_SOFTWARE_MAIN_FOLDER = ""
 CFG_SOFTWARE_MAIN_ENTRY = ""
 CFG_SOFTWARE_COVERAGE_WHITELIST = []
-CFG_MODULE = ""
-CFG_MODULE_MAIN_FOLDER = ""
-CFG_MODULE_MAIN_ENTRY = ""
 
 CFG_ADDRESS_TABLE = ""
 CFG_COVERAGE_RESULT = ""
@@ -77,12 +74,6 @@ def parseConfig(config_file):
                 CFG_SOFTWARE_COVERAGE_WHITELIST.append(line.split(":")[1])
             if "ADDRESS_TABLE:" in line:
                 CFG_ADDRESS_TABLE = line.split(":")[1]
-            # if "MODULE:" in line:
-            #     CFG_MODULE = line.split(":")[1]
-            # if "MODULE_MAIN_FOLDER" in line:
-            #     CFG_MODULE_MAIN_FOLDER = line.split(":")[1]
-            # if "MODULE_MAIN_ENTRY:" in line:
-            #     CFG_MODULE_MAIN_ENTRY = line.split(":")[1]
             if "COVERAGE_RESULT:" in line:
                 CFG_COVERAGE_RESULT = line.split(":")[1]
             if "RELATIONS:" in line:

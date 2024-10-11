@@ -7,7 +7,6 @@ import relationCoverage
 
 HW_RIP_COUNT = [0 for i in range(0x7FFFFF)]
 SW_PC_COUNT = [0 for i in range(0x7FFFFF)]
-#MOD_PC_COUNT =[0 for i in range(0x7FFFFF)]
 
 def branchHitCount(fileName, type, line, column):
     lib = None
@@ -15,11 +14,7 @@ def branchHitCount(fileName, type, line, column):
     if type=="HW":
         lib = addressTranslation.HW_DWARF_INFO
     elif type == "SW":
-        #offset = 1
         lib = addressTranslation.SW_DWARF_INFO
-    # elif type == "MOD":
-    #     offset = 1
-    #     lib = MOD_DWARF_INFO
     for info in lib:
         if info[0] == fileName and info[1] == int(line) and info[2] == (int(column)-offset):
             if type == "HW":
@@ -28,23 +23,17 @@ def branchHitCount(fileName, type, line, column):
             elif type == "SW":
                 if addressTranslation.SW_BRANCHES[info[3]] != [-1,-1]:
                     return addressTranslation.SW_BRANCHES[info[3]]
-            # elif type == "MOD":
-            #     if mod_branches[info[3]] != [-1,-1]:
-            #         return mod_branches[info[3]]
     return None
 
 def lineToHitCount(fileName, type, line):
     global HW_RIP_COUNT
     global SW_PC_COUNT
-    #global MOD_PC_COUNT
     lib = None
     hitCount = -1
     if type=="HW":
         lib = addressTranslation.HW_DWARF_INFO
     elif type == "SW":
         lib = addressTranslation.SW_DWARF_INFO
-    # elif type == "MOD":
-    #     lib = MOD_DWARF_INFO
     for info in lib:
         if info[0] == fileName and info[1] == int(line):
             if type == "HW":
@@ -53,9 +42,6 @@ def lineToHitCount(fileName, type, line):
             elif type == "SW":
                 if hitCount < SW_PC_COUNT[info[3]]:
                     hitCount = SW_PC_COUNT[info[3]]
-            # elif type == "MOD":
-            #     if hitCount < MOD_PC_COUNT[info[3]]:
-            #         hitCount = MOD_PC_COUNT[info[3]]
     return hitCount
 
 def calculateBranchesRecursive(fileName, type, node, branches_covered, branches_valid):
@@ -251,26 +237,6 @@ def exportPackages(cobertura):
         cobertura.write('\t\t<package name="SW:' + sw.Name + '" line-rate="' + str(line_rate) + '" branch-rate="' + str(branch_rate) + '" complexity="0.0">\n')
         exportClasses(cobertura, "SW", sw.Files)                
         cobertura.write('\t\t</package>\n')
-    # for mod in coverageStructure.COVERAGE_STRUCTURE.MODLibraries:
-    #     lines_covered = 0
-    #     lines_valid = 0
-    #     branches_covered = 0
-    #     branches_valid = 0
-    #     line_rate = 0.0
-    #     branch_rate = 0.0
-    #     for file in mod.Files:
-    #         lines_covered_tmp, lines_valid_tmp, branches_covered_tmp, branches_valid_tmp = calculateLinesRecursive(file.Name, "MOD", file.Content)
-    #         lines_covered += lines_covered_tmp
-    #         lines_valid += lines_valid_tmp
-    #         branches_covered += branches_covered_tmp
-    #         branches_valid += branches_valid_tmp
-    #     if lines_valid > 0:
-    #         line_rate = lines_covered/lines_valid
-    #     if branches_valid > 0:
-    #         branch_rate = branches_covered/branches_valid
-    #     cobertura.write('\t\t<package name="MOD:' + mod.Name + '" line-rate="' + str(line_rate) + '" branch-rate="' + str(branch_rate) + '" complexity="0.0">\n')
-    #     exportClasses(cobertura, "MOD", mod.Files)                
-    #     cobertura.write('\t\t</package>\n')
     cobertura.write('\t</packages>\n')
 
 def generateCoverage(cobertura):
@@ -297,13 +263,6 @@ def generateCoverage(cobertura):
             lines_valid += lines_valid_tmp
             branches_covered += branches_covered_tmp
             branches_valid += branches_valid_tmp
-    # for mod in coverageStructure.COVERAGE_STRUCTURE.MODLibraries:
-    #     for file in mod.Files:
-    #         lines_covered_tmp, lines_valid_tmp, branches_covered_tmp, branches_valid_tmp = calculateLinesRecursive(file.Name, "MOD", file.Content)
-    #         lines_covered += lines_covered_tmp
-    #         lines_valid += lines_valid_tmp
-    #         branches_covered += branches_covered_tmp
-    #         branches_valid += branches_valid_tmp
     if lines_valid > 0:
         line_rate = lines_covered/lines_valid
     if branches_valid > 0:
@@ -322,9 +281,6 @@ def exportSources(cobertura):
     for sw in coverageStructure.COVERAGE_STRUCTURE.SWLibraries:
         for file in sw.Files:
             cobertura.write('\t\t<source>' + file.Name + '</source>\n')
-    # for mod in cover.MODLibraries:
-    #     for file in mod.Files:
-    #         cobertura.write('\t\t<source>' + file.Name + '</source>\n')
 
     cobertura.write('\t</sources>\n')
 
@@ -365,14 +321,9 @@ def readCoverageResults():
             SW_PC_COUNT[i] += count
             if(count != 0):
                 updateRelationCounter(i, count)
-        #for i in range(0x2FFFFF):
-        #    count = int.from_bytes(buf.read(8), "little")
-        #    mod_pc_count[i] += count
         for i in range(0x2FFFFF):
             true = int.from_bytes(buf.read(8), "little")
             false = int.from_bytes(buf.read(8), "little")
-            #if i==275700:
-            #    print("Stop")
             if true != 0 or false != 0:
                 addressTranslation.HW_BRANCHES[i] = [true, false]
         for i in range(0x2FFFFF):
@@ -380,12 +331,6 @@ def readCoverageResults():
             false = int.from_bytes(buf.read(8), "little")
             if true != 0 or false != 0:
                 addressTranslation.SW_BRANCHES[i] = [true, false]
-        #for i in range(0x2FFFFF):
-        #    true = int.from_bytes(buf.read(8), "little")
-        #    false = int.from_bytes(buf.read(8), "little")
-        #    if true != 0 or false != 0:
-        #        addressTranslation.MOD_BRANCHES[i] = [true, false]
-
 
 def processCoverageResults():
     readCoverageResults()
