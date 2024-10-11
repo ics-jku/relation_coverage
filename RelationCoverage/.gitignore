@@ -1,0 +1,3 @@
+coverage_simulator/build/**
+
+__pycache__/**
